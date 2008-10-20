@@ -1,0 +1,15 @@
+
+Mat2Py -- Calling python functions from Matlab
+==============================================
+
+
+Usage
+=====
+
+You need to copy mat2py_init.m and mat2py_call.m into yout matlab project. 
+mat2py_init should be called at the beginning of you Matlab script.
+
+Internal Mechanism
+==================
+
+
