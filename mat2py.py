@@ -1,27 +1,31 @@
 #!/usr/bin/python
 
-import os
-import time
+"""
+  mat2py -- some documentation
+"""
+
 from scipy import io as matio
 from twisted.internet import reactor
 from twisted.web import soap,resource,server
 
-mat2py_xcp = "/tmp/mat2py_xcp.mat"
+# Registered functions dictionary
+funcs = {}
 
-
-class Mat2Py(soap.SOAPPublisher):
-	def __init__(self):
+# Actual Webservice object
+class M2PSOAP(soap.SOAPPublisher):
+	"""	Webservice object used internally by mat2py
+	"""
+	def __init__(self,xcp):
 		soap.SOAPPublisher()
-		self.funcs = {}
+		self.xcp = xcp
 		
-	def reg_func(self, name, func):
-		self.funcs[name] = func
-
 	def soap_call(self, name):
-		mat = matio.loadmat(mat2py_xcp)
+		print self.xcp
+		mat = matio.loadmat(self.xcp)
 		args = list( mat['varargin'] )
 		try:
-			func = self.funcs[name]
+			print "Called %s"%name
+			func = funcs[name]
 			ret = func( *args )
 		except:
 			print "Could not call %s with args [%s]", (name, args)
@@ -31,27 +35,22 @@ class Mat2Py(soap.SOAPPublisher):
 				d["ret%d"%(i+1)] = ret[i] 
 		else:
 			d["ret1"] = ret
-		matio.savemat(mat2py_xcp, d)
+		matio.savemat(self.xcp, d)
 
-if __name__ == '__main__':
-	import sys
+def reg_func(func, name):
+	""" Register the given funtion under the specified name to matlab"""
+	funcs[name] = func
 
-	def ping():
-		time.sleep(3)
-		print "ping() called"
+def run(port=8080, path="/tmp/mat2py_xcp.mat"):
+	""" Run event-loop and wait for incoming requests on the specified port. Use the 
+		given file path for data exchange.
 
-	def hello(a, b):
-		print "Hello!"
-		print "  a=", a
-		print "  b=", b
-		return a,b,a*b
-
-	m2p = Mat2Py()
-	m2p.reg_func("ping", ping)
-	m2p.reg_func("hello", hello)
-
+		This funtion does not return.
+	"""
+	print "Starting Webservice on http://localhost:%d. Data exchange file is '%s'" % (port,path)
+	m2p = M2PSOAP(path)
 	root = resource.Resource()
-	root.putChild('mat2py', m2p )
-	reactor.listenTCP(8080, server.Site(root))
+	root.putChild('mat2py', m2p)
+	reactor.listenTCP(port, server.Site(root))
 	reactor.run()
 
