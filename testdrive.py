@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import sys
+import time
 import mat2py
 
 """
@@ -13,8 +14,9 @@ import mat2py
 
 
 def ping():
-	time.sleep(3)
 	print "ping() called"
+	time.sleep(3)
+	return 0
 
 def hello(a, b):
 	print "Hello!"
@@ -22,7 +24,7 @@ def hello(a, b):
 	print "  b=", b
 	return a,b,a*b
 
-mat2py.reg_func("ping", ping)
-mat2py.reg_func("hello", hello)
+mat2py.reg_func(ping,  "ping")
+mat2py.reg_func(hello, "hello")
 mat2py.run()
 
