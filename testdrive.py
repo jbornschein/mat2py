@@ -3,6 +3,7 @@
 import sys
 import time
 import mat2py
+import numpy as np
 
 """
  This Script exports two functions to Matlab.
@@ -22,7 +23,7 @@ def hello(a, b):
 	print "Hello!"
 	print "  a=", a
 	print "  b=", b
-	return a,b,a*b
+	return np.dot(a,b)
 
 mat2py.reg_func(ping,  "ping")
 mat2py.reg_func(hello, "hello")
